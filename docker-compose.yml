@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+
+  cpp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpp
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./data:/app/data
+    networks:
+      - app-network
+
+  nodejs-server:
+    build:
+      context: ./MVC
+      dockerfile: Dockerfile.js
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./MVC:/app
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    command: mongod --bind_ip_all --ipv6
+    environment:
+      - MONGODB_DATABASE=hello
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  react-app:
+    build:
+      context: ./web/frontend-web
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"  # Ensure this port is different from nodejs-server
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
